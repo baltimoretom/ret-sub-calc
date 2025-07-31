@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <title>EBD Retiree Health Benefits Estimator</title>
+    <style>
+      .calc-section {
+        background-color: #f8f9fa;
+        padding: 25px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      .section-title {
+        margin-top: 0;
+        color: #343a40;
+        border-bottom: 2px solid #dee2e6;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+      }
+      .grid-container,
+      .grid-container-3-col {
+        display: grid;
+        gap: 10px 20px;
+      }
+      .grid-container {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        align-items: center;
+      }
+      .grid-container-3-col {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      }
+      .results-grid {
+        display: grid;
+        grid-template-columns: max-content auto;
+        gap: 10px 20px;
+        align-items: baseline;
+      }
+      .results-label {
+        font-weight: bold;
+        text-align: right;
+        color: #495057;
+      }
+      .results-value {
+        font-weight: bold;
+        text-align: left;
+        color: #0056b3;
+      }
+      .input-field {
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        background-color: white;
+        transition: border-color 0.2s, background-color 0.2s;
+      }
+      .input-field:focus {
+        border-color: #0056b3;
+        outline: none;
+      }
+      .input-field:disabled {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+      }
+      .service-box {
+        border: 2px solid;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+      }
+      .add-btn {
+        padding: 8px 12px;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      .main-button {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background-color 0.2s;
+      }
+      .reset-button {
+        background-color: #6c757d;
+        color: white;
+      }
+      .reset-button:hover {
+        background-color: #5a6268;
+      }
+      .print-button {
+        background-color: #007bff;
+        color: white;
+      }
+      .print-button:hover {
+        background-color: #0069d9;
+      }
+      .table-header {
+        text-align: left;
+        padding: 10px 8px;
+        border-bottom: 2px solid #dee2e6;
+        white-space: nowrap;
+      }
+      .table-header.num {
+        text-align: right;
+      }
+      .table-cell {
+        padding: 10px 8px;
+        border-bottom: 1px solid #e9ecef;
+      }
+      .table-cell-num {
+        text-align: right;
+        padding: 10px 8px;
+        border-bottom: 1px solid #e9ecef;
+        white-space: nowrap;
+      }
+      .subsidy-color {
+        color: #28a745;
+        font-weight: bold;
+      }
+      .final-cost-header {
+        text-align: right;
+        border-left: 2px solid #343a40;
+      }
+      .final-cost-cell {
+        text-align: right;
+        font-weight: bold;
+        border-left: 2px solid #343a40;
+      }
+      .employment-period {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        background-color: #fff;
+      }
+      .ep-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px;
+        align-items: center;
+      }
+      .remove-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        padding: 5px 10px;
+        margin-top: 10px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: background-color 0.2s;
+      }
+      .remove-btn:hover {
+        background-color: #c82333;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="calculator-container"
+      style="
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto,
+          'Helvetica Neue', Arial, sans-serif;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 900px;
+        margin: auto;
+        background-color: #fdfdff;
+      "
+    >
+      <div id="calc-header" style="text-align: center; margin-bottom: 30px">
+        <h2 style="color: #003366; margin-bottom: 5px">
+          EBD Retiree Health Benefits Estimator
+        </h2>
+        <p style="color: #555; margin-top: 0">
+          An unofficial tool for estimating retiree health premium subsidies.
+        </p>
+      </div>
+
+      <!-- Step 1: Employee Information -->
+      <div id="step1" class="calc-section">
+        <h3 class="section-title">Step 1: Employee Information</h3>
+        <div class="grid-container">
+          <div>
+            <label for="retireeGroup"><b>Hire Date Group:</b></label>
+            <select id="retireeGroup" class="input-field">
+              <option value="pre2011">Hired before July 1, 2011</option>
+              <option value="post2011">Hired on or after July 1, 2011</option>
+            </select>
+          </div>
+          <div>
+            <label><b>Retirement Reason:</b></label>
+            <div style="padding-top: 10px">
+              <input type="checkbox" id="disability" />
+              <label for="disability"> Retiring due to Disability</label>
+            </div>
+          </div>
+          <div>
+            <label><b>Employee Medicare Status:</b></label>
+            <div style="padding-top: 10px">
+              <input type="checkbox" id="retireeOnMedicare" />
+              <label for="retireeOnMedicare">
+                Employee is enrolled in Medicare Parts A & B</label
+              >
+            </div>
+          </div>
+          <div>
+            <label><b>Dependent's Medicare Status:</b></label>
+            <div style="padding-top: 10px">
+              <input type="checkbox" id="dependentOnMedicare" />
+              <label for="dependentOnMedicare">
+                Employee's dependent(s) are enrolled in Medicare</label
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Service History -->
+      <div id="step2" class="calc-section">
+        <h3 class="section-title">Step 2: Employee State Service History</h3>
+        <div class="service-box" style="border-color: #4a90e2">
+          <h4 style="color: #4a90e2">
+            Pension System (MSRPS) / Other State Service
+          </h4>
+          <div id="msrps-employment-periods"></div>
+          <button
+            onclick="addEmploymentPeriod('msrps')"
+            class="add-btn"
+            style="background-color: #4a90e2"
+          >
+            + Add Pension Service
+          </button>
+        </div>
+        <div class="service-box" style="border-color: #50e3c2">
+          <h4 style="color: #50e3c2">
+            Optional Retirement Program (ORP) Service
+          </h4>
+          <div id="orp-employment-periods"></div>
+          <button
+            onclick="addEmploymentPeriod('orp')"
+            class="add-btn"
+            style="background-color: #50e3c2"
+          >
+            + Add ORP Service
+          </button>
+        </div>
+      </div>
+
+      <!-- Results Section -->
+      <div id="results-section" class="calc-section" style="display: none">
+        <div id="eligibility-results-header">
+          <h3 class="section-title">Employee Eligibility Results</h3>
+          <div class="results-grid">
+            <div class="results-label">Total Creditable Service:</div>
+            <div id="total-years" class="results-value"></div>
+            <div class="results-label">Health Subsidy Status:</div>
+            <div id="eligibility-status" class="results-value"></div>
+          </div>
+        </div>
+
+        <div id="premium-calculator-section" style="margin-top: 20px">
+          <h3
+            class="section-title"
+            style="border-top: 1px solid #dee2e6; padding-top: 20px"
+          >
+            Step 3: Estimate Employee's Monthly Premium
+          </h3>
+          <p
+            id="medicare-note"
+            style="
+              color: #495057;
+              background-color: #e9ecef;
+              padding: 10px;
+              border: 1px solid #ced4da;
+              border-radius: 4px;
+              display: none;
+            "
+          ></p>
+          <div class="grid-container-3-col">
+            <div>
+              <label for="healthPlan"><b>Health Plan:</b></label
+              ><select id="healthPlan" class="input-field"></select>
+            </div>
+            <div>
+              <label for="healthCoverage"><b>Health Coverage:</b></label
+              ><select id="healthCoverage" class="input-field"></select>
+            </div>
+            <div>
+              <label for="prescriptionPlan"><b>Prescription Plan:</b></label
+              ><select id="prescriptionPlan" class="input-field"></select>
+            </div>
+            <div>
+              <label for="prescriptionCoverage"
+                ><b>Prescription Coverage:</b></label
+              ><select id="prescriptionCoverage" class="input-field"></select>
+            </div>
+            <div>
+              <label for="dentalPlan"><b>Dental Plan:</b></label
+              ><select id="dentalPlan" class="input-field"></select>
+            </div>
+            <div>
+              <label for="dentalCoverage"><b>Dental Coverage:</b></label
+              ><select id="dentalCoverage" class="input-field"></select>
+            </div>
+          </div>
+          <div
+            style="
+              margin-top: 20px;
+              background: white;
+              padding: 15px;
+              border-radius: 4px;
+              border: 1px solid #ccc;
+              overflow-x: auto;
+            "
+          >
+            <table
+              id="results-table"
+              style="width: 100%; border-collapse: collapse"
+            >
+              <thead>
+                <tr>
+                  <th class="table-header">Plan Component</th>
+                  <th class="table-header num">Total Premium</th>
+                  <th class="table-header num">State Subsidy</th>
+                  <th class="table-header final-cost-header">
+                    Employee's Cost
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="table-cell">Health</td>
+                  <td id="health-total" class="table-cell-num"></td>
+                  <td
+                    id="health-subsidy"
+                    class="table-cell-num subsidy-color"
+                  ></td>
+                  <td
+                    id="health-final"
+                    class="table-cell-num final-cost-cell"
+                  ></td>
+                </tr>
+                <tr>
+                  <td class="table-cell">Prescription</td>
+                  <td id="rx-total" class="table-cell-num"></td>
+                  <td id="rx-subsidy" class="table-cell-num subsidy-color"></td>
+                  <td id="rx-final" class="table-cell-num final-cost-cell"></td>
+                </tr>
+                <tr>
+                  <td class="table-cell">Dental</td>
+                  <td id="dental-total" class="table-cell-num"></td>
+                  <td
+                    id="dental-subsidy"
+                    class="table-cell-num subsidy-color"
+                  ></td>
+                  <td
+                    id="dental-final"
+                    class="table-cell-num final-cost-cell"
+                  ></td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr style="border-top: 2px solid #333">
+                  <td
+                    colspan="3"
+                    style="
+                      text-align: right;
+                      padding: 10px;
+                      font-weight: bold;
+                      font-size: 1.1em;
+                    "
+                  >
+                    Total Estimated Monthly Cost:
+                  </td>
+                  <td
+                    id="total-final"
+                    style="
+                      text-align: right;
+                      padding: 10px;
+                      font-weight: bold;
+                      font-size: 1.3em;
+                    "
+                  ></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+        <div
+          id="print-action-buttons"
+          style="
+            text-align: center;
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+          "
+        >
+          <button onclick="printResults()" class="main-button print-button">
+            🖨️ Print Results
+          </button>
+          <button onclick="resetCalculator()" class="main-button reset-button">
+            Reset
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const rateData = {
+        health: {
+          'No Health Plan': {
+            'N/A': { ret: 0, state_retiree: 0, state_dependent: 0 }
+          },
+          'CareFirst PPO (CFPPO)': {
+            'EE/RET Only': {
+              ret: 129.56,
+              state_retiree: 518.24,
+              state_dependent: 0
+            },
+            'EE/RET + 1 Child': {
+              ret: 233.18,
+              state_retiree: 518.24,
+              state_dependent: 414.54
+            },
+            'EE/RET + Spouse': {
+              ret: 233.18,
+              state_retiree: 518.24,
+              state_dependent: 414.54
+            },
+            'EE/RET + 2 or more': {
+              ret: 323.88,
+              state_retiree: 518.24,
+              state_dependent: 777.34
+            },
+            'RET Only with Medicare': {
+              ret: 64.78,
+              state_retiree: 259.16,
+              state_dependent: 0
+            },
+            'RET + 1 One w Medicare': {
+              ret: 194.32,
+              state_retiree: 259.16,
+              state_dependent: 518.1
+            },
+            'RET + 1 Both w Medicare': {
+              ret: 129.56,
+              state_retiree: 259.16,
+              state_dependent: 259.08
+            },
+            'RET + 2 One w Medicare': {
+              ret: 297.94,
+              state_retiree: 259.16,
+              state_dependent: 932.64
+            },
+            'RET + 2 Two w Medicare': {
+              ret: 259.1,
+              state_retiree: 259.16,
+              state_dependent: 777.28
+            },
+            'Ret + 2 or more all w Medicare': {
+              ret: 194.32,
+              state_retiree: 259.16,
+              state_dependent: 518.1
+            },
+            'RET + 3 or more 1,2,3,w Medicare': {
+              ret: 323.88,
+              state_retiree: 259.16,
+              state_dependent: 1036.42
+            },
+            'Non-Medicare Retiree + DP With Medicare': {
+              ret: 453.34,
+              state_retiree: 518.24,
+              state_dependent: 0
+            }
+          },
+          'CareFirst EPO (CFEPO)': {
+            'EE/RET Only': {
+              ret: 86.46,
+              state_retiree: 489.98,
+              state_dependent: 0
+            },
+            'EE/RET + 1 Child': {
+              ret: 181.46,
+              state_retiree: 489.98,
+              state_dependent: 538.3
+            },
+            'EE/RET + Spouse': {
+              ret: 181.46,
+              state_retiree: 489.98,
+              state_dependent: 538.3
+            },
+            'EE/RET + 2 or more': {
+              ret: 224.8,
+              state_retiree: 489.98,
+              state_dependent: 783.94
+            },
+            'RET Only with Medicare': {
+              ret: 42.62,
+              state_retiree: 241.56,
+              state_dependent: 0
+            },
+            'RET + 1 One w Medicare': {
+              ret: 128.38,
+              state_retiree: 241.56,
+              state_dependent: 486.02
+            },
+            'RET + 1 Both w Medicare': {
+              ret: 93.66,
+              state_retiree: 241.56,
+              state_dependent: 289.18
+            },
+            'RET + 2 One w Medicare': {
+              ret: 214.16,
+              state_retiree: 241.56,
+              state_dependent: 972.06
+            },
+            'RET + 2 Two w Medicare': {
+              ret: 136.6,
+              state_retiree: 241.56,
+              state_dependent: 532.52
+            },
+            'Ret + 2 or more all w Medicare': {
+              ret: 117.14,
+              state_retiree: 241.56,
+              state_dependent: 422.34
+            },
+            'RET + 3 or more 1,2,3,w Medicare': {
+              ret: 224.8,
+              state_retiree: 241.56,
+              state_dependent: 1032.36
+            },
+            'Non-Medicare Retiree + DP With Medicare': {
+              ret: 365.98,
+              state_retiree: 489.98,
+              state_dependent: 0
+            }
+          },
+          'UHC PPO (UHCPPO)': {
+            'EE/RET Only': {
+              ret: 127.44,
+              state_retiree: 509.76,
+              state_dependent: 0
+            },
+            'EE/RET + 1 Child': {
+              ret: 229.4,
+              state_retiree: 509.76,
+              state_dependent: 407.84
+            },
+            'EE/RET + Spouse': {
+              ret: 229.4,
+              state_retiree: 509.76,
+              state_dependent: 407.84
+            },
+            'EE/RET + 2 or more': {
+              ret: 318.62,
+              state_retiree: 509.76,
+              state_dependent: 764.74
+            },
+            'RET Only with Medicare': {
+              ret: 63.72,
+              state_retiree: 254.9,
+              state_dependent: 0
+            },
+            'RET + 1 One w Medicare': {
+              ret: 191.14,
+              state_retiree: 254.9,
+              state_dependent: 509.74
+            },
+            'RET + 1 Both w Medicare': {
+              ret: 127.44,
+              state_retiree: 254.9,
+              state_dependent: 254.86
+            },
+            'RET + 2 One w Medicare': {
+              ret: 293.1,
+              state_retiree: 254.9,
+              state_dependent: 917.56
+            },
+            'RET + 2 Two w Medicare': {
+              ret: 254.88,
+              state_retiree: 254.9,
+              state_dependent: 764.62
+            },
+            'Ret + 2 or more all w Medicare': {
+              ret: 191.14,
+              state_retiree: 254.9,
+              state_dependent: 509.74
+            },
+            'RET + 3 or more 1,2,3,w Medicare': {
+              ret: 318.62,
+              state_retiree: 254.9,
+              state_dependent: 1019.6
+            },
+            'Non-Medicare Retiree + DP With Medicare': {
+              ret: 446.02,
+              state_retiree: 509.76,
+              state_dependent: 0
+            }
+          },
+          'UHC EPO (UHCEPO)': {
+            'EE/RET Only': {
+              ret: 86.98,
+              state_retiree: 492.96,
+              state_dependent: 0
+            },
+            'EE/RET + 1 Child': {
+              ret: 180.9,
+              state_retiree: 492.96,
+              state_dependent: 532.22
+            },
+            'EE/RET + Spouse': {
+              ret: 180.9,
+              state_retiree: 492.96,
+              state_dependent: 532.22
+            },
+            'EE/RET + 2 or more': {
+              ret: 215.7,
+              state_retiree: 492.96,
+              state_dependent: 729.44
+            },
+            'RET Only with Medicare': {
+              ret: 57.44,
+              state_retiree: 325.54,
+              state_dependent: 0
+            },
+            'RET + 1 One w Medicare': {
+              ret: 144.42,
+              state_retiree: 325.54,
+              state_dependent: 492.88
+            },
+            'RET + 1 Both w Medicare': {
+              ret: 114.88,
+              state_retiree: 325.54,
+              state_dependent: 325.5
+            },
+            'RET + 2 One w Medicare': {
+              ret: 215.7,
+              state_retiree: 325.54,
+              state_dependent: 896.86
+            },
+            'RET + 2 Two w Medicare': {
+              ret: 197.22,
+              state_retiree: 325.54,
+              state_dependent: 792.1
+            },
+            'Ret + 2 or more all w Medicare': {
+              ret: 172.32,
+              state_retiree: 325.54,
+              state_dependent: 650.98
+            },
+            'RET + 3 or more 1,2,3,w Medicare': {
+              ret: 215.7,
+              state_retiree: 325.54,
+              state_dependent: 896.86
+            },
+            'Non-Medicare Retiree + DP With Medicare': {
+              ret: 469.88,
+              state_retiree: 492.96,
+              state_dependent: 0
+            }
+          },
+          'Kaiser IHM (KHP)': {
+            'EE/RET Only': {
+              ret: 86.4,
+              state_retiree: 489.66,
+              state_dependent: 0
+            },
+            'EE/RET + 1 Child': {
+              ret: 181.34,
+              state_retiree: 489.66,
+              state_dependent: 537.94
+            },
+            'EE/RET + Spouse': {
+              ret: 181.34,
+              state_retiree: 489.66,
+              state_dependent: 537.94
+            },
+            'EE/RET + 2 or more': {
+              ret: 224.66,
+              state_retiree: 489.66,
+              state_dependent: 783.4
+            }
+          }
+        },
+        prescription: {
+          'No Prescription Plan': {
+            'N/A': { ret: 0, state_retiree: 0, state_dependent: 0 }
+          },
+          'CVS/Caremark': {
+            'EE/RET Only': {
+              ret: 81.48,
+              state_retiree: 244.46,
+              state_dependent: 0
+            },
+            'EE/RET + 1 Child': {
+              ret: 108.28,
+              state_retiree: 244.46,
+              state_dependent: 80.4
+            },
+            'EE/RET + Spouse': {
+              ret: 135.22,
+              state_retiree: 244.46,
+              state_dependent: 161.24
+            },
+            'EE/RET + 2 or more': {
+              ret: 162.96,
+              state_retiree: 244.46,
+              state_dependent: 244.42
+            },
+            Spouse: { ret: 81.48, state_retiree: 0, state_dependent: 244.46 },
+            'Spouse & 1 Child': {
+              ret: 108.28,
+              state_retiree: 0,
+              state_dependent: 324.86
+            },
+            'Spouse & Children': {
+              ret: 162.96,
+              state_retiree: 0,
+              state_dependent: 488.88
+            },
+            Child: { ret: 26.8, state_retiree: 0, state_dependent: 80.4 },
+            Children: { ret: 81.48, state_retiree: 0, state_dependent: 244.42 }
+          }
+        },
+        dental: {
+          'No Dental Plan': {
+            'N/A': { ret: 0, state_retiree: 0, state_dependent: 0 }
+          },
+          'Delta Dental DHMO': {
+            'EE/RET Only': {
+              ret: 9.12,
+              state_retiree: 9.12,
+              state_dependent: 0
+            },
+            'EE/RET + 1 Child': {
+              ret: 18.28,
+              state_retiree: 9.12,
+              state_dependent: 9.16
+            },
+            'EE/RET + Spouse': {
+              ret: 15.9,
+              state_retiree: 9.12,
+              state_dependent: 6.8
+            },
+            'EE/RET + 2 or more': {
+              ret: 25.66,
+              state_retiree: 9.12,
+              state_dependent: 16.56
+            }
+          },
+          'United Concordia DPPO': {
+            'EE/RET Only': {
+              ret: 14.98,
+              state_retiree: 14.98,
+              state_dependent: 0
+            },
+            'EE/RET + 1 Child': {
+              ret: 28.62,
+              state_retiree: 14.98,
+              state_dependent: 13.64
+            },
+            'EE/RET + Spouse': {
+              ret: 29.96,
+              state_retiree: 14.98,
+              state_dependent: 14.96
+            },
+            'EE/RET + 2 or more': {
+              ret: 56.1,
+              state_retiree: 14.98,
+              state_dependent: 41.12
+            }
+          }
+        }
+      };
+      let eligibilityInfo = {
+        years: 0,
+        months: 0,
+        status: 'Not Eligible',
+        subsidyType: 'None',
+        hasOrpService: false
+      };
+
+      function addEmploymentPeriod(type) {
+        const container = document.getElementById(
+          type === 'orp' ? 'orp-employment-periods' : 'msrps-employment-periods'
+        );
+        const newPeriod = document.createElement('div');
+        newPeriod.className = 'employment-period';
+        let orpCheckboxHTML =
+          type === 'orp'
+            ? `<div style="align-self: center;"><input type="checkbox" class="is-10-month"><label> 10-Mo?</label></div>`
+            : '';
+        newPeriod.innerHTML = `<div class="ep-grid"><div><label>Start:</label><input type="date" class="start-date input-field"></div><div><label>End:</label><input type="date" class="end-date input-field"></div><div><label>% Full-time:</label><input type="number" class="percentage input-field" value="100" min="0" max="100"></div>${orpCheckboxHTML}</div><button onclick="removeEmploymentPeriod(this)" class="remove-btn">Remove</button>`;
+        container.appendChild(newPeriod);
+      }
+
+      function removeEmploymentPeriod(button) {
+        button.parentElement.remove();
+        calculateEligibilityAndRates();
+      }
+
+      function calculateTotalServiceMonths() {
+        let totalMonths = 0;
+        document.querySelectorAll('.employment-period').forEach((period) => {
+          const startDate = new Date(period.querySelector('.start-date').value);
+          const endDate = new Date(period.querySelector('.end-date').value);
+          const percentage =
+            parseFloat(period.querySelector('.percentage').value) / 100;
+          if (
+            isNaN(startDate.getTime()) ||
+            isNaN(endDate.getTime()) ||
+            isNaN(percentage)
+          ) {
+            return 0;
+          }
+          endDate.setDate(endDate.getDate() + 1);
+          let months =
+            (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+            (endDate.getMonth() - startDate.getMonth());
+          if (period.querySelector('.is-10-month')?.checked) {
+            months = Math.floor(months / 10) * 12 + (months % 10);
+          }
+          totalMonths += months * percentage;
+        });
+        return totalMonths;
+      }
+      function calculateEligibility() {
+        const totalMonths = calculateTotalServiceMonths();
+        eligibilityInfo.months = totalMonths;
+        eligibilityInfo.years = totalMonths / 12;
+        eligibilityInfo.hasOrpService =
+          document
+            .getElementById('orp-employment-periods')
+            .querySelector('.employment-period') !== null;
+        const retireeGroup = document.getElementById('retireeGroup').value;
+        const isDisability = document.getElementById('disability').checked;
+        const rules = {
+          pre2011: { full: 16, prorated: 5 },
+          post2011: { full: 25, prorated: 10 }
+        };
+        const currentRule = rules[retireeGroup];
+        if (isDisability) {
+          eligibilityInfo.status = 'Eligible (Disability)';
+          eligibilityInfo.subsidyType = 'Full';
+        } else if (eligibilityInfo.years >= currentRule.full) {
+          eligibilityInfo.status = 'Eligible for Full Subsidy';
+          eligibilityInfo.subsidyType = 'Full';
+        } else if (eligibilityInfo.years >= currentRule.prorated) {
+          const prorationPercentage = Math.round(
+            (eligibilityInfo.years / currentRule.full) * 100
+          );
+          eligibilityInfo.status = `Eligible for Prorated Subsidy (${prorationPercentage}% Subsidy)`;
+          eligibilityInfo.subsidyType = 'Prorated';
+        } else {
+          eligibilityInfo.status = 'Not Eligible for Subsidy';
+          eligibilityInfo.subsidyType = 'None';
+        }
+      }
+      function populateSelect(selectId, options, selectedVal) {
+        const select = document.getElementById(selectId);
+        const currentVal = selectedVal || select.value;
+        select.innerHTML = '';
+        options.forEach((opt) => select.add(new Option(opt, opt)));
+        if (options.includes(currentVal)) select.value = currentVal;
+        else if (options.length > 0) select.value = options[0];
+      }
+
+      function updateHealthCoverageOptions() {
+        const retireeOnMedicare =
+          document.getElementById('retireeOnMedicare').checked;
+        const dependentOnMedicare = document.getElementById(
+          'dependentOnMedicare'
+        ).checked;
+        const healthPlan = document.getElementById('healthPlan').value;
+        const allHealthOptions = Object.keys(rateData.health[healthPlan] || {});
+
+        const filterFunc = (opt) => {
+          const lowerOpt = opt.toLowerCase();
+          const hasDependents =
+            lowerOpt.includes('spouse') ||
+            lowerOpt.includes('child') ||
+            lowerOpt.includes('dp');
+          const isRetireeOnly = !hasDependents;
+
+          if (retireeOnMedicare && dependentOnMedicare) {
+            if (
+              !lowerOpt.includes('medicare') ||
+              lowerOpt.includes('non-medicare') ||
+              lowerOpt.includes('one w')
+            )
+              return false;
+          } else if (retireeOnMedicare && !dependentOnMedicare) {
+            if (
+              !lowerOpt.includes('medicare') ||
+              lowerOpt.includes('non-medicare') ||
+              lowerOpt.includes('both w')
+            )
+              return false;
+          } else if (!retireeOnMedicare && dependentOnMedicare) {
+            if (
+              isRetireeOnly ||
+              !lowerOpt.includes('non-medicare retiree + dp with medicare')
+            )
+              return false;
+          } else {
+            // Neither on Medicare
+            if (lowerOpt.includes('medicare')) return false;
+          }
+          return true;
+        };
+        populateSelect('healthCoverage', allHealthOptions.filter(filterFunc));
+      }
+
+      function updateCoverageOptions(planType, filterFunc = null) {
+        const planSelect = document.getElementById(`${planType}Plan`);
+        const coverageSelect = document.getElementById(`${planType}Coverage`);
+        const selectedPlan = planSelect.value;
+        let coverageOptions = Object.keys(
+          rateData[planType][selectedPlan] || {}
+        );
+        if (filterFunc) {
+          coverageOptions = coverageOptions.filter(filterFunc);
+        }
+        populateSelect(coverageSelect.id, coverageOptions);
+      }
+
+      function formatCurrency(num) {
+        return `$${Math.max(0, num).toFixed(2)}`;
+      }
+
+      function handleMedicareLogic() {
+        const retireeOnMedicare =
+          document.getElementById('retireeOnMedicare').checked;
+        const dependentOnMedicare = document.getElementById(
+          'dependentOnMedicare'
+        ).checked;
+        const healthCoverageVal = document
+          .getElementById('healthCoverage')
+          .value.toLowerCase();
+        const rxPlanSelect = document.getElementById('prescriptionPlan');
+        const rxCoverageSelect = document.getElementById(
+          'prescriptionCoverage'
+        );
+        const medicareNote = document.getElementById('medicare-note');
+
+        const hasDependents =
+          healthCoverageVal.includes('spouse') ||
+          healthCoverageVal.includes('child') ||
+          healthCoverageVal.includes('dp');
+
+        if (retireeOnMedicare && (!hasDependents || dependentOnMedicare)) {
+          rxPlanSelect.value = 'No Prescription Plan';
+          updateCoverageOptions('prescription');
+          rxPlanSelect.disabled = true;
+          rxCoverageSelect.disabled = true;
+          medicareNote.innerHTML =
+            '<b>Important:</b> Retirees in a State Medicare Advantage plan are not eligible for the State-sponsored prescription plan and must enroll in a Medicare Part D plan separately.';
+          medicareNote.style.display = 'block';
+          return true; // Rx is disabled
+        } else {
+          rxPlanSelect.disabled = false;
+          rxCoverageSelect.disabled = false;
+          let filter;
+          if (retireeOnMedicare) {
+            // Retiree on Medicare, but dependent(s) are not
+            const singleDepKeywords = [
+              '+ 1 one',
+              'dp without medicare',
+              'dp with medicare',
+              'and 1 child'
+            ];
+            const isSingleDep =
+              singleDepKeywords.some((key) =>
+                healthCoverageVal.includes(key)
+              ) && !healthCoverageVal.includes('and 2 children');
+            if (isSingleDep) {
+              filter = (opt) =>
+                !opt.toLowerCase().includes('ee/ret') &&
+                !opt.toLowerCase().includes('&') &&
+                !opt.toLowerCase().includes('children');
+            } else {
+              filter = (opt) => !opt.toLowerCase().includes('ee/ret');
+            }
+          } else {
+            // Retiree not on Medicare
+            filter = (opt) => opt.toLowerCase().includes('ee/ret');
+          }
+          updateCoverageOptions('prescription', filter);
+          medicareNote.style.display = 'none';
+          return false;
+        }
+      }
+
+      function calculatePremiums() {
+        const isRxDisabled = handleMedicareLogic();
+        const getCost = (planType) => {
+          if (isRxDisabled && planType === 'prescription') {
+            return { total: 0, subsidy: 0, final: 0 };
+          }
+          const plan = document.getElementById(`${planType}Plan`).value;
+          const coverage = document.getElementById(`${planType}Coverage`).value;
+          const rates = rateData[planType][plan]?.[coverage] || {
+            ret: 0,
+            state_retiree: 0,
+            state_dependent: 0
+          };
+          const totalPremium =
+            rates.ret + rates.state_retiree + rates.state_dependent;
+          let calculatedSubsidy = 0;
+          if (eligibilityInfo.subsidyType !== 'None') {
+            const isOrpException =
+              eligibilityInfo.hasOrpService &&
+              document.getElementById('retireeGroup').value === 'pre2011';
+            let retireeSubsidy = 0;
+            let dependentSubsidy = 0;
+            if (eligibilityInfo.subsidyType === 'Full') {
+              retireeSubsidy = rates.state_retiree;
+              if (!isOrpException || planType === 'dental') {
+                dependentSubsidy = rates.state_dependent;
+              }
+            } else if (eligibilityInfo.subsidyType === 'Prorated') {
+              const yearsForFull =
+                document.getElementById('retireeGroup').value === 'pre2011'
+                  ? 16
+                  : 25;
+              retireeSubsidy =
+                (eligibilityInfo.years / yearsForFull) * rates.state_retiree;
+              if (!isOrpException || planType === 'dental') {
+                dependentSubsidy =
+                  (eligibilityInfo.years / yearsForFull) *
+                  rates.state_dependent;
+              }
+            }
+            calculatedSubsidy = retireeSubsidy + dependentSubsidy;
+          }
+          const yourCost = totalPremium - calculatedSubsidy;
+          return {
+            total: totalPremium,
+            subsidy: calculatedSubsidy,
+            final: yourCost
+          };
+        };
+
+        const health = getCost('health');
+        const rx = getCost('prescription');
+        const dental = getCost('dental');
+        document.getElementById('health-total').textContent = formatCurrency(
+          health.total
+        );
+        document.getElementById(
+          'health-subsidy'
+        ).textContent = `-${formatCurrency(health.subsidy)}`;
+        document.getElementById('health-final').textContent = formatCurrency(
+          health.final
+        );
+        document.getElementById('rx-total').textContent = formatCurrency(
+          rx.total
+        );
+        document.getElementById('rx-subsidy').textContent = `-${formatCurrency(
+          rx.subsidy
+        )}`;
+        document.getElementById('rx-final').textContent = formatCurrency(
+          rx.final
+        );
+        document.getElementById('dental-total').textContent = formatCurrency(
+          dental.total
+        );
+        document.getElementById(
+          'dental-subsidy'
+        ).textContent = `-${formatCurrency(dental.subsidy)}`;
+        document.getElementById('dental-final').textContent = formatCurrency(
+          dental.final
+        );
+        document.getElementById('total-final').textContent = formatCurrency(
+          health.final + rx.final + dental.final
+        );
+      }
+
+      function calculateEligibilityAndRates() {
+        const resultsSection = document.getElementById('results-section');
+        if (resultsSection.style.display !== 'block') {
+          resultsSection.style.display = 'block';
+        }
+        calculateEligibility();
+        updateHealthCoverageOptions();
+        const totalSvcMonths = Math.round(eligibilityInfo.months);
+        const years = Math.floor(totalSvcMonths / 12);
+        const months = totalSvcMonths % 12;
+        document.getElementById(
+          'total-years'
+        ).textContent = `${totalSvcMonths} Months (${years} Years and ${months} Months)`;
+        document.getElementById('eligibility-status').textContent =
+          eligibilityInfo.status;
+        calculatePremiums();
+      }
+
+      function resetCalculator() {
+        document.getElementById('retireeGroup').value = 'pre2011';
+        document.getElementById('disability').checked = false;
+        document.getElementById('retireeOnMedicare').checked = false;
+        document.getElementById('dependentOnMedicare').checked = false;
+        document.getElementById('msrps-employment-periods').innerHTML = '';
+        document.getElementById('orp-employment-periods').innerHTML = '';
+        addEmploymentPeriod('msrps');
+        calculateEligibilityAndRates();
+        document.getElementById('results-section').style.display = 'none';
+      }
+
+      function printResults() {
+        const printWindow = window.open('', '_blank');
+        const totalYearsText =
+          document.getElementById('total-years').textContent;
+        const eligibilityStatusText =
+          document.getElementById('eligibility-status').textContent;
+        const tableHtml = document.getElementById('results-table').outerHTML;
+        const printContent = `<html><head><title>Retiree Health Benefits Estimate</title><style>body { font-family: 'Times New Roman', Times, serif; margin: 25px; } h1 { text-align: center; color: #003366; } .results-grid { display: grid; grid-template-columns: max-content auto; gap: 5px 15px; margin-bottom: 20px; font-size: 1.1em; } .results-label { font-weight: bold; text-align: right; } table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 1.1em; } th, td { border: 1px solid #ccc; padding: 8px; text-align: left; } th { background-color: #f2f2f2; } td.num, th.num { text-align: right; } tfoot td { font-weight: bold; }</style></head><body><h1>EBD Retiree Health Benefits Estimate</h1><div class="results-grid"><div class="results-label">Total Creditable Service:</div><div>${totalYearsText}</div><div class="results-label">Health Subsidy Status:</div><div>${eligibilityStatusText}</div></div>${tableHtml}</body></html>`;
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('calculator-container');
+
+        container.addEventListener('input', calculateEligibilityAndRates);
+
+        document.getElementById('healthPlan').addEventListener('change', () => {
+          updateHealthCoverageOptions();
+          calculatePremiums();
+        });
+        document
+          .getElementById('healthCoverage')
+          .addEventListener('change', calculatePremiums);
+        document
+          .getElementById('prescriptionPlan')
+          .addEventListener('change', calculatePremiums);
+        document
+          .getElementById('prescriptionCoverage')
+          .addEventListener('change', calculatePremiums);
+        document.getElementById('dentalPlan').addEventListener('change', () => {
+          updateCoverageOptions('dental');
+          calculatePremiums();
+        });
+        document
+          .getElementById('dentalCoverage')
+          .addEventListener('change', calculatePremiums);
+
+        populateSelect('healthPlan', Object.keys(rateData.health));
+        populateSelect('prescriptionPlan', Object.keys(rateData.prescription));
+        populateSelect('dentalPlan', Object.keys(rateData.dental));
+
+        resetCalculator();
+      });
+    </script>
+  </body>
+</html>
