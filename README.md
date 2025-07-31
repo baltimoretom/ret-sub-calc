@@ -112,6 +112,10 @@ This calculator is provided for informational purposes only and should not be co
 
 This project is open source and available under the [MIT License](LICENSE).
 
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project.
+
 ---
 
 *For official information about retiree health benefits, please contact your Employee Benefits Division directly.*
